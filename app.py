@@ -4,6 +4,11 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
+base_image_url = "https://liangfgithub.github.io/MovieImages/"
+
+def get_movie_image_url(movie_id):
+    return f"{base_image_url}{movie_id}.jpg?raw=true"
+
 # Load movies and ratings data
 movies_df = pd.read_csv(r'C:\Users\Raza_Ali\Downloads\ml-1m\ml-1m\movies.dat', sep='::', engine='python', names=['MovieID', 'Title', 'Genres'], encoding='latin-1')
 ratings_df = pd.read_csv(r'C:\Users\Raza_Ali\Downloads\ml-1m\ml-1m\ratings.dat', sep='::', engine='python', names=['UserID', 'MovieID', 'Rating', 'Timestamp'], encoding='latin-1')
@@ -101,7 +106,7 @@ def myIBCF(new_user_ratings, similarity_matrix, top_n_similarities, rating_matri
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
 # Define a list of sample movies for users to rate in System II
-sample_movies = sorted_movies['Title'].head(5).tolist()
+sample_movies = sorted_movies['Title'].head(120).tolist()
 
 # App layout
 app.layout = html.Div([
@@ -115,17 +120,19 @@ app.layout = html.Div([
 
 # Layout component for System II: User Rating Input
 def create_rating_input(movie_titles):
-    return html.Div([
-        html.H4("Please rate the following movies:"),
-        html.Div([
+    return html.Div(
+        style={'height': '500px', 'overflowY': 'scroll'},  # Set a fixed height and enable vertical scrolling
+        children=[
             html.Div([
                 html.Label(movie),
-                dcc.Slider(id={'type': 'user-rating', 'index': i},
-                           min=0, max=5, step=0.5, value=2.5,
-                           marks={j: str(j) for j in range(6)})
+                dcc.RadioItems(
+                    id={'type': 'user-rating', 'index': i},
+                    options=[{'label': str(j), 'value': j} for j in range(1, 6)],
+                    value=None  # No default value
+                )
             ], style={'margin-bottom': '10px'}) for i, movie in enumerate(movie_titles)
-        ])
-    ])
+        ]
+    )
 
 # Callback for rendering tabs content
 @app.callback(Output('tabs-content', 'children'), Input('tabs', 'value'))
@@ -135,7 +142,7 @@ def render_content(tab):
             html.H3('Select your favorite genre'),
             dcc.Dropdown(
                 id='genre-dropdown',
-                options=[{'label': genre, 'value': genre} for genre in ['Comedy', 'Action', 'Drama']],
+                options=[{'label': genre, 'value': genre} for genre in ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western' ]],
                 value='Comedy'
             ),
             html.Button('Get Recommendations', id='get-recommendations', n_clicks=0),
@@ -164,13 +171,11 @@ def update_genre_recommendations(n_clicks, selected_genre):
               [State({'type': 'user-rating', 'index': i}, 'value') for i in range(len(sample_movies))])
 def update_cf_recommendations(n_clicks, *ratings):
     if n_clicks > 0:
-        user_ratings = {str(movie_id_mapping[movie]): rating for movie, rating in zip(sample_movies, ratings)}
+        user_ratings = {str(movie_id_mapping[movie]): rating for movie, rating in zip(sample_movies, ratings) if rating is not None}
         recommended_movie_ids = myIBCF(user_ratings, cosine_sim_df_masked, top_n_similarities, rating_matrix)
-        # Fetch movie titles based on the recommended movie IDs
         recommended_movies = movies_df[movies_df['MovieID'].isin(recommended_movie_ids)]
-        # Assuming you want to display the movie titles as recommendations:
-        return html.Ul([html.Li(movies_df.loc[movies_df['MovieID'] == int(movie_id), 'Title'].iloc[0])
-                        for movie_id in recommended_movie_ids])
+        return [html.P(movies_df.loc[movies_df['MovieID'] == int(movie_id), 'Title'].iloc[0])
+                for movie_id in recommended_movie_ids]
     return html.Div()
 
 if __name__ == '__main__':
