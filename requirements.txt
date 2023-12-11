@@ -6,4 +6,4 @@ dash-table==5.0.0
 pandas
 numpy
 scikit-learn
-gunicorn==20.0.4
+gunicorn
