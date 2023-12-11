@@ -105,6 +105,7 @@ def myIBCF(new_user_ratings, similarity_matrix, top_n_similarities, rating_matri
 
 # Set up the Dash app
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
+server = app.server
 
 # Define a list of sample movies for users to rate in System II
 sample_movies = sorted_movies['Title'].head(120).tolist()
