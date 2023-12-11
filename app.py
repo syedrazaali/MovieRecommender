@@ -3,11 +3,12 @@ from dash import html, dcc, callback, Input, Output, State
 import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+import dash_bootstrap_components as dbc
 
-base_image_url = "https://liangfgithub.github.io/MovieImages/"
 
 def get_movie_image_url(movie_id):
-    return f"{base_image_url}{movie_id}.jpg?raw=true"
+    return f"https://liangfgithub.github.io/MovieImages/{movie_id}.jpg?raw=true"
+
 
 # Load movies and ratings data
 movies_df = pd.read_csv(r'C:\Users\Raza_Ali\Downloads\ml-1m\ml-1m\movies.dat', sep='::', engine='python', names=['MovieID', 'Title', 'Genres'], encoding='latin-1')
@@ -108,31 +109,67 @@ app = dash.Dash(__name__, suppress_callback_exceptions=True)
 # Define a list of sample movies for users to rate in System II
 sample_movies = sorted_movies['Title'].head(120).tolist()
 
-# App layout
+# Main app layout
 app.layout = html.Div([
     html.H1("Movie Recommender System"),
     dcc.Tabs(id="tabs", value='tab-1', children=[
         dcc.Tab(label='System I: Genre-Based', value='tab-1'),
         dcc.Tab(label='System II: Collaborative Filtering', value='tab-2'),
     ]),
-    html.Div(id='tabs-content')
+    html.Div(id='tabs-content'),
+
+    # Separately place the submit button outside the tabs-content
+    html.Button('Submit Ratings', id='submit-ratings', n_clicks=0, style={
+        'display': 'block',
+        'margin-top': '20px',  # Adjust this value to move the button further down
+        'margin-left': 'auto',
+        'margin-right': 'auto'
+    })
 ])
 
 # Layout component for System II: User Rating Input
 def create_rating_input(movie_titles):
-    return html.Div(
-        style={'height': '500px', 'overflowY': 'scroll'},  # Set a fixed height and enable vertical scrolling
-        children=[
-            html.Div([
-                html.Label(movie),
+    movie_cards = []
+    for i, movie in enumerate(movie_titles):
+        movie_card = html.Div(
+            [
+                html.Img(
+                    src=get_movie_image_url(movie_id_mapping[movie]),
+                    style={
+                        'width': '150px',  # Adjust width as needed
+                        'height': 'auto',  # Adjust height as needed
+                        'margin': '10px'
+                    }
+                ),
                 dcc.RadioItems(
                     id={'type': 'user-rating', 'index': i},
                     options=[{'label': str(j), 'value': j} for j in range(1, 6)],
-                    value=None  # No default value
+                    value=None,
+                    labelStyle={'display': 'inline-block', 'margin-right': '5px'}, # Adjust the right margin to bring radio buttons closer
+                    inputStyle={"margin-right": "5px"}, # Adjust space between radio button and label
+                    style={'display': 'flex', 'justifyContent': 'center'}  # Align the radio buttons in a row centered
                 )
-            ], style={'margin-bottom': '10px'}) for i, movie in enumerate(movie_titles)
-        ]
+            ],
+            style={
+                'display': 'inline-block',  # This makes it align in a grid
+                'width': '200px',  # Adjust the width as needed
+                'verticalAlign': 'top'  # Align the tops of the movie cards
+            }
+        )
+        movie_cards.append(movie_card)
+
+    return html.Div(
+        movie_cards,
+        style={
+            'display': 'flex',  # Use flexbox to create a shelf-like layout
+            'flexWrap': 'wrap',  # Allow the cards to wrap to the next line
+            'justifyContent': 'space-around',  # Evenly space the movie cards
+            'overflowY': 'auto',  # Add a scrollbar if necessary
+            'alignItems': 'flex-start',  # Align items at the top
+            'height': '500px'  # Adjust the height of the shelf
+        }
     )
+
 
 # Callback for rendering tabs content
 @app.callback(Output('tabs-content', 'children'), Input('tabs', 'value'))
