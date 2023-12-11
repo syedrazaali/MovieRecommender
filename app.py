@@ -112,21 +112,14 @@ server = app.server
 sample_movies = sorted_movies['Title'].head(120).tolist()
 
 # Main app layout
+# Main app layout
 app.layout = html.Div([
     html.H1("Movie Recommender System"),
     dcc.Tabs(id="tabs", value='tab-1', children=[
         dcc.Tab(label='System I: Genre-Based', value='tab-1'),
         dcc.Tab(label='System II: Collaborative Filtering', value='tab-2'),
     ]),
-    html.Div(id='tabs-content'),
-
-    # Separately place the submit button outside the tabs-content
-    html.Button('Submit Ratings', id='submit-ratings', n_clicks=0, style={
-        'display': 'block',
-        'margin-top': '20px',  # Adjust this value to move the button further down
-        'margin-left': 'auto',
-        'margin-right': 'auto'
-    })
+    html.Div(id='tabs-content')
 ])
 
 # Layout component for System II: User Rating Input
@@ -218,6 +211,4 @@ def update_cf_recommendations(n_clicks, *ratings):
     return html.Div()
 
 if __name__ == '__main__':
-    # Get the port to listen on (default to 8050 if not specified)
-    port = int(os.environ.get('PORT', 8050))
-    app.run_server(debug=True, host='0.0.0.0', port=port)
+    app.run_server(debug=True)
