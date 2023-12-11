@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import dash_bootstrap_components as dbc
+import os
 
 
 def get_movie_image_url(movie_id):
@@ -217,4 +218,6 @@ def update_cf_recommendations(n_clicks, *ratings):
     return html.Div()
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    # Get the port to listen on (default to 8050 if not specified)
+    port = int(os.environ.get('PORT', 8050))
+    app.run_server(debug=True, host='0.0.0.0', port=port)
