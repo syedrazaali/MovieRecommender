@@ -11,8 +11,8 @@ def get_movie_image_url(movie_id):
 
 
 # Load movies and ratings data
-movies_df = pd.read_csv(r'C:\Users\Raza_Ali\Downloads\ml-1m\ml-1m\movies.dat', sep='::', engine='python', names=['MovieID', 'Title', 'Genres'], encoding='latin-1')
-ratings_df = pd.read_csv(r'C:\Users\Raza_Ali\Downloads\ml-1m\ml-1m\ratings.dat', sep='::', engine='python', names=['UserID', 'MovieID', 'Rating', 'Timestamp'], encoding='latin-1')
+movies_df = pd.read_csv('https://raw.githubusercontent.com/syedrazaali/MovieRecommender/main/movies.dat', sep='::', engine='python', names=['MovieID', 'Title', 'Genres'], encoding='latin-1')
+ratings_df = pd.read_csv('https://raw.githubusercontent.com/syedrazaali/MovieRecommender/main/ratings.dat', sep='::', engine='python', names=['UserID', 'MovieID', 'Rating', 'Timestamp'], encoding='latin-1')
 
 movie_id_mapping = {row['Title']: row['MovieID'] for index, row in movies_df.iterrows()}
 
